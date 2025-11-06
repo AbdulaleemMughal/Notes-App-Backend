@@ -16,7 +16,8 @@
   "buildCommand": "npm run build",
   "env": {
     "NODE_ENV": "production",
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret"
+    "MONGODB_URL": "@mongodb_url",
+    "MONGODB_COLLECTION_NAME": "@mongodb_collection_name",
+    "JWT_SECRET_KEY": "@jwt_secret_key"
   }
 }
