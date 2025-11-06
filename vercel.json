@@ -11,13 +11,5 @@
       "src": "/(.*)",
       "dest": "src/index.ts"
     }
-  ],
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "env": {
-    "NODE_ENV": "production",
-    "MONGODB_URL": "@mongodb_url",
-    "MONGODB_COLLECTION_NAME": "@mongodb_collection_name",
-    "JWT_SECRET_KEY": "@jwt_secret_key"
-  }
+  ]
 }
