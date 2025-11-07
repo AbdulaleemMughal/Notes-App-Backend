@@ -22,7 +22,7 @@ export const userAuth = async (
       process.env.JWT_SECRET_KEY as string
     ) as { _id: string };
 
-    const user = await User.findById({ _id: decodedToken._id });
+    const user = await User.findById({ _id: decodedToken._id }).select('-password');
     if (!user) {
       throw new Error("No User Found!");
     }
