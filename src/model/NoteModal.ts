@@ -5,6 +5,7 @@ export interface INote extends Document {
   title: string;
   description: string;
   isFavourite: boolean;
+  color: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -12,8 +13,8 @@ export interface INote extends Document {
 const NoteSchema = new Schema<INote>(
   {
     userId: {
-      type: Schema.Types.ObjectId, 
-      ref: "User", 
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     title: {
@@ -30,6 +31,10 @@ const NoteSchema = new Schema<INote>(
     isFavourite: {
       type: Boolean,
       default: false,
+    },
+    color: {
+      type: String,
+      default: "0_6px_12px_rgba(255,223,186,0.5)",
     },
   },
   {

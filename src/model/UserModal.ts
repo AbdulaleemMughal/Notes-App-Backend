@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -9,6 +9,9 @@ export interface IUser extends Document {
   userName: string;
   email: string;
   password: string;
+  layout: string;
+  image: string;
+  gender: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -39,6 +42,20 @@ const UserSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>>(
       required: true,
       minlength: 8,
     },
+    layout: {
+      type: String,
+      default: "grid",
+      enum: ["grid", "list"],
+    },
+    image: {
+      type: String,
+      default: "https://hope.be/wp-content/uploads/2015/05/no-user-image.gif",
+    },
+    gender: {
+      type: String,
+      default: "Male",
+      enum: ["Male", "Female", "Not to say"],
+    },
   },
   {
     timestamps: true,
@@ -54,19 +71,24 @@ UserSchema.methods.getJwtToken = function (): string {
   }
 
   const token = jwt.sign({ _id: user._id }, secretKey, {
-    expiresIn: "1d",
+    expiresIn: "10d",
   });
   return token;
 };
 
-UserSchema.methods.validatePassword = async function (passwordInputByUser: string): Promise<boolean> {
+UserSchema.methods.validatePassword = async function (
+  passwordInputByUser: string
+): Promise<boolean> {
   const user = this;
   const hashedPassword = user.password;
 
-  const isPasswordCorrect = await bcrypt.compare(passwordInputByUser, hashedPassword);
+  const isPasswordCorrect = await bcrypt.compare(
+    passwordInputByUser,
+    hashedPassword
+  );
 
   return isPasswordCorrect;
-}
+};
 
 const User =
   (mongoose.models.User as UserModel) ||

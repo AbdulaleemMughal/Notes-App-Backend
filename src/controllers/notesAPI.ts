@@ -5,7 +5,7 @@ import { Note } from "../model/NoteModal.js";
 export const addNote = async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    const { title, description, isFavourite } = req.body;
+    const { title, description, isFavourite, color } = req.body;
 
     if (!user) {
       throw new Error("Please LogIn first.");
@@ -18,6 +18,7 @@ export const addNote = async (req: Request, res: Response) => {
       title,
       description,
       isFavourite,
+      color,
     });
 
     await newNote.save();
@@ -104,13 +105,29 @@ export const updateNote = async (req: Request, res: Response) => {
 
     await noteToUpdate.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Note updated successfully!",
-        data: noteToUpdate,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Note updated successfully!",
+      data: noteToUpdate,
+    });
+  } catch (err) {
+    res.status(400).json({
+      message:
+        err instanceof Error ? err.message : "Error while deleting note.",
+    });
+  }
+};
+
+export const getSingleNote = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      throw new Error("No Note found.");
+    };
+
+    const note = await Note.findById({ _id: id });
+
+    res.status(200).json({ success: true, message: "Note Found.", data: note });
   } catch (err) {
     res.status(400).json({
       message:

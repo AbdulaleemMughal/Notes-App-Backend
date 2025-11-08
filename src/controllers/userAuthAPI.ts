@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 
 export const signUp = async (req: Request, res: Response) => {
   try {
-    const { userName, email, password } = req.body;
+    const { userName, email, password, layout, gender, image } = req.body;
 
     if (!userName) {
       return res.status(400).json({
@@ -31,7 +31,10 @@ export const signUp = async (req: Request, res: Response) => {
     const user = new User({
       userName,
       email,
+      layout,
       password: hashedPassword,
+      gender,
+      image,
     });
 
     await user.save();
@@ -47,11 +50,15 @@ export const signUp = async (req: Request, res: Response) => {
         _id: user._id,
         username: user.userName,
         email: user.email,
+        layout: user.layout,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
     });
   } catch (err) {
+    res.status(401).json({
+      message: err instanceof Error ? err.message : "Error while Signing Up",
+    });
   }
 };
 
@@ -81,13 +88,7 @@ export const login = async (req: Request, res: Response) => {
       success: true,
       message: "Login Successfull!",
       token: token,
-      user: {
-        _id: savedUser._id,
-        username: savedUser.userName,
-        email: savedUser.email,
-        createdAt: savedUser.createdAt,
-        updatedAt: savedUser.updatedAt,
-      },
+      user: savedUser,
     });
   } catch (err) {
     res.status(401).json({
@@ -130,5 +131,38 @@ export const logout = async (req: Request, res: Response) => {
     });
   } catch (err) {
     res.status(500).json({ message: "Logout failed!" });
+  }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+
+    const { userName, email, image, gender, layout } = req.body;
+    const user = req.user;
+    if(!user) {
+      throw new Error("No User Found.")
+    }
+
+    const loggedInUser = await User.findById({ _id: user._id});
+    if(!loggedInUser) {
+      throw new Error("Please LogIn First!")
+    }
+
+    if(userName !== undefined) loggedInUser.userName = userName;
+    if(email !== undefined) loggedInUser.email = email;
+    if(gender !== undefined) loggedInUser.gender = gender;
+    if(layout !== undefined) loggedInUser.layout = layout;
+
+    res.status(200).json({
+      success: true,
+      message: "Profile Updated Successfully!",
+      user: loggedInUser
+    });
+
+  } catch (err) {
+    res.status(400).json({
+      message:
+        err instanceof Error ? err.message : "Failed to get user details.",
+    });
   }
 };
