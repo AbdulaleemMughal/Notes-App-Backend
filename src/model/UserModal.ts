@@ -12,6 +12,7 @@ export interface IUser extends Document {
   layout: string;
   image: string;
   gender: string;
+  aboutYourself: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -54,7 +55,12 @@ const UserSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>>(
     gender: {
       type: String,
       default: "Male",
-      enum: ["Male", "Female", "Not to say"],
+      enum: ["Male", "Female", "Others"],
+    },
+    aboutYourself: {
+      type: String,
+      maxlength: 200,
+      default: "Write about yourself...",
     },
   },
   {
@@ -71,7 +77,7 @@ UserSchema.methods.getJwtToken = function (): string {
   }
 
   const token = jwt.sign({ _id: user._id }, secretKey, {
-    expiresIn: "10d",
+    expiresIn: "7d",
   });
   return token;
 };

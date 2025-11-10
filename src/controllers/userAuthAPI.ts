@@ -5,7 +5,8 @@ import bcrypt from "bcrypt";
 
 export const signUp = async (req: Request, res: Response) => {
   try {
-    const { userName, email, password, layout, gender, image } = req.body;
+    const { userName, email, password, layout, gender, image, aboutYourself } =
+      req.body;
 
     if (!userName) {
       return res.status(400).json({
@@ -35,6 +36,7 @@ export const signUp = async (req: Request, res: Response) => {
       password: hashedPassword,
       gender,
       image,
+      aboutYourself,
     });
 
     await user.save();
@@ -51,6 +53,9 @@ export const signUp = async (req: Request, res: Response) => {
         username: user.userName,
         email: user.email,
         layout: user.layout,
+        gender: user.gender,
+        image: user.image,
+        aboutYourself: user.aboutYourself,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
@@ -136,33 +141,33 @@ export const logout = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
-
-    const { userName, email, image, gender, layout } = req.body;
+    const { userName, email, image, gender, layout, aboutYourself } = req.body;
     const user = req.user;
-    if(!user) {
-      throw new Error("No User Found.")
+    if (!user) {
+      throw new Error("No User Found.");
     }
 
-    const loggedInUser = await User.findById({ _id: user._id});
-    if(!loggedInUser) {
-      throw new Error("Please LogIn First!")
+    const loggedInUser = await User.findById({ _id: user._id });
+    if (!loggedInUser) {
+      throw new Error("Please LogIn First!");
     }
 
-    if(userName !== undefined) loggedInUser.userName = userName;
-    if(email !== undefined) loggedInUser.email = email;
-    if(gender !== undefined) loggedInUser.gender = gender;
-    if(layout !== undefined) loggedInUser.layout = layout;
+    if (userName !== undefined) loggedInUser.userName = userName;
+    if (email !== undefined) loggedInUser.email = email;
+    if (gender !== undefined) loggedInUser.gender = gender;
+    if (layout !== undefined) loggedInUser.layout = layout;
+    if (aboutYourself !== undefined) loggedInUser.aboutYourself = aboutYourself;
+
+    await loggedInUser.save();
 
     res.status(200).json({
       success: true,
       message: "Profile Updated Successfully!",
-      user: loggedInUser
+      user: loggedInUser,
     });
-
   } catch (err) {
     res.status(400).json({
-      message:
-        err instanceof Error ? err.message : "Failed to get user details.",
+      message: err instanceof Error ? err.message : "Failed to update user .",
     });
   }
 };
