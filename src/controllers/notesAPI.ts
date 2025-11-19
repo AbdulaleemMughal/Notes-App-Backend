@@ -123,7 +123,7 @@ export const getSingleNote = async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!id) {
       throw new Error("No Note found.");
-    };
+    }
 
     const note = await Note.findById({ _id: id });
 

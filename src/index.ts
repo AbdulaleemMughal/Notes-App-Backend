@@ -5,6 +5,7 @@ import { userRouter } from "./routes/userAuth.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { noteRouter } from "./routes/note.js";
+import fileUpload from "express-fileupload";
 
 dotenv.config();
 const app = express();
@@ -12,6 +13,12 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
 app.use(
   cors({
     origin: "*",

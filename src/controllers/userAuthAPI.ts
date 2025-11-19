@@ -2,6 +2,23 @@ import type { Request, Response } from "express";
 import { signUpValidation } from "../utils/signUpValidation.js";
 import User from "../model/UserModal.js";
 import bcrypt from "bcrypt";
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+import type { UploadedFile } from "express-fileupload";
+dotenv.config();
+
+const { CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+  process.env;
+
+if (!CLOUDINARY_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+  throw new Error("Missing Cloudinary environment variables");
+}
+
+cloudinary.config({
+  cloud_name: CLOUDINARY_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
+});
 
 export const signUp = async (req: Request, res: Response) => {
   try {
@@ -141,33 +158,60 @@ export const logout = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { userName, email, image, gender, layout, aboutYourself } = req.body;
+    const { userName, email, gender, layout, aboutYourself } = req.body;
     const user = req.user;
-    if (!user) {
-      throw new Error("No User Found.");
-    }
 
-    const loggedInUser = await User.findById({ _id: user._id });
-    if (!loggedInUser) {
-      throw new Error("Please LogIn First!");
-    }
+    if (!user) throw new Error("No User Found.");
 
+    const loggedInUser = await User.findById(user._id);
+    if (!loggedInUser) throw new Error("Please Log In First!");
+
+    // APPLY TEXT FIELDS FIRST
     if (userName !== undefined) loggedInUser.userName = userName;
     if (email !== undefined) loggedInUser.email = email;
     if (gender !== undefined) loggedInUser.gender = gender;
     if (layout !== undefined) loggedInUser.layout = layout;
     if (aboutYourself !== undefined) loggedInUser.aboutYourself = aboutYourself;
 
-    await loggedInUser.save();
+    // CHECK FOR FILE
+    const file = req.files?.image as UploadedFile;
 
-    res.status(200).json({
-      success: true,
-      message: "Profile Updated Successfully!",
-      user: loggedInUser,
-    });
+    // CASE 1: If image exists, upload then save user
+    if (file) {
+      cloudinary.uploader.upload(file.tempFilePath, async (err, result) => {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            message: err.message,
+          });
+        }
+        if (result) {
+          loggedInUser.image = result.secure_url;
+          await loggedInUser.save();
+
+          return res.status(200).json({
+            success: true,
+            message: "Profile Updated!",
+            user: loggedInUser,
+          });
+        }
+      });
+    }
+
+    // CASE 2: No image uploaded → Just save text fields
+    else {
+      await loggedInUser.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile Updated!",
+        user: loggedInUser,
+      });
+    }
   } catch (err) {
     res.status(400).json({
-      message: err instanceof Error ? err.message : "Failed to update user .",
+      success: false,
+      message: err instanceof Error ? err.message : "Failed to update user.",
     });
   }
 };
