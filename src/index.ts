@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://notes-app-backend-4cmp.vercel.app/'],
+    origin: ['http://localhost:3000', 'https://notes-app-frontend-ikq1.vercel.app/'],
     credentials: true,
     methods: ["GET", "PATCH", "PUT", "POST", "DELETE"],
   })
