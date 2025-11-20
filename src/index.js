@@ -6,33 +6,26 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { noteRouter } from "./routes/note.js";
 import fileUpload from "express-fileupload";
-
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
-
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: ['http://localhost:3000', 'https://notes-app-backend-4cmp.vercel.app/'],
+app.use(cors({
+    origin: "*",
     credentials: true,
     methods: ["GET", "PATCH", "PUT", "POST", "DELETE"],
-  })
-);
-app.use(
-  fileUpload({
+}));
+app.use(fileUpload({
     useTempFiles: true,
     tempFileDir: "/tmp/",
-  })
-);
-
+}));
 app.use("/", userRouter);
 app.use("/", noteRouter);
-
 connectDatabase().then(() => {
-  console.log("Database connnected successfully!");
-  app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
+    console.log("Database connnected successfully!");
+    app.listen(port, () => {
+        console.log(`Server is running on http://localhost:${port}`);
+    });
 });
+//# sourceMappingURL=index.js.map

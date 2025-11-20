@@ -1,0 +1,66 @@
+import mongoose, { Document, Schema, Model } from "mongoose";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import bcrypt from "bcrypt";
+dotenv.config();
+const UserSchema = new Schema({
+    userName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+    },
+    password: {
+        type: String,
+        required: true,
+        minlength: 8,
+    },
+    layout: {
+        type: String,
+        default: "grid",
+        enum: ["grid", "list"],
+    },
+    image: {
+        type: String,
+        default: "https://hope.be/wp-content/uploads/2015/05/no-user-image.gif",
+    },
+    gender: {
+        type: String,
+        default: "Male",
+        enum: ["Male", "Female", "Others"],
+    },
+    aboutYourself: {
+        type: String,
+        maxlength: 200,
+        default: "Write about yourself...",
+    },
+}, {
+    timestamps: true,
+});
+UserSchema.methods.getJwtToken = function () {
+    const user = this;
+    const secretKey = process.env.JWT_SECRET_KEY;
+    if (!secretKey) {
+        throw new Error("JWT_SECRET_KEY is not defined in environment variables");
+    }
+    const token = jwt.sign({ _id: user._id }, secretKey, {
+        expiresIn: "7d",
+    });
+    return token;
+};
+UserSchema.methods.validatePassword = async function (passwordInputByUser) {
+    const user = this;
+    const hashedPassword = user.password;
+    const isPasswordCorrect = await bcrypt.compare(passwordInputByUser, hashedPassword);
+    return isPasswordCorrect;
+};
+const User = mongoose.models.User ||
+    mongoose.model("User", UserSchema);
+export default User;
+//# sourceMappingURL=UserModal.js.map
